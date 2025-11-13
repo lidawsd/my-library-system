@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>登录 - 图书管理系统</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            width: 350px;
+        }
+        h1 { 
+            text-align: center; 
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .demo-accounts {
+            background-color: #e9f7fe;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>📚 图书管理系统</h1>
+        
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">用户名:</label>
+                <input type="text" id="username" name="username" pattern="[A-Za-z0-9]+" title="只能输入字母和数字" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码:</label>
+                <input type="password" id="password" name="password" pattern="[A-Za-z0-9]+" title="只能输入字母和数字" required>
+            </div>
+            
+            <button type="submit" class="btn">登录</button>
+        </form>
+        
+        <div class="register-link">
+            <p>还没有账户？ <a href="{{ url_for('register') }}">立即注册</a></p>
+        </div>
+        
+        <div class="demo-accounts">
+            <p><strong>演示账户:</strong></p>
+            <p>管理员: ABC / ABC123</p>
+        </div>
+    </div>
+</body>
+</html>

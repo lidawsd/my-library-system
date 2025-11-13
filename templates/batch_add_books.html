@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>批量添加图书 - 图书管理系统</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .header { background-color: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 800px; margin: 20px auto; padding: 0 20px; }
+        .form-container { background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .instructions { background-color: #e9f7fe; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #555; font-weight: bold; }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+            resize: vertical;
+            font-family: monospace;
+            min-height: 300px;
+        }
+        .btn { 
+            padding: 10px 15px; 
+            text-decoration: none; 
+            border: none; 
+            border-radius: 3px; 
+            cursor: pointer;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .submit-btn { background-color: #4CAF50; color: white; }
+        .cancel-btn { background-color: #f44336; color: white; }
+        .user-info { color: white; }
+        .admin-badge { background-color: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; margin-left: 10px; }
+        .nav-links { margin-bottom: 20px; }
+        .example { background-color: #f8f9fa; padding: 10px; border-radius: 3px; margin-top: 5px; }
+        .flash-messages { margin-bottom: 20px; }
+        .flash-success { background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+        .flash-warning { background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+        .flash-error { background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 图书管理系统</h1>
+        <div class="user-info">
+            欢迎，{{ user.username }} 
+            {% if user.role == 'admin' %}<span class="admin-badge">管理员</span>{% endif %}
+            <a href="{{ url_for('logout') }}" class="btn logout-btn">注销</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="nav-links">
+            <a href="/" class="btn">🏠 首页</a>
+            <a href="/books" class="btn">📖 图书列表</a>
+            <a href="/add_book" class="btn">➕ 单本添加</a>
+        </div>
+
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-{{ category }}">{{ message | safe }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="form-container">
+            <h2>批量添加图书</h2>
+            
+            <div class="instructions">
+                <h3>使用说明：</h3>
+                <p>每行输入一本图书的信息，格式为：<strong>书名,作者,分类</strong></p>
+                <p>分类为可选，如果不指定则默认为"未分类"</p>
+                
+                <div class="example">
+                    <strong>示例：</strong><br>
+                    红楼梦,曹雪芹,文学<br>
+                    三体,刘慈欣,科幻<br>
+                    人类简史,尤瓦尔·赫拉利,历史<br>
+                    Python编程,John Smith<br>
+                    时间简史,霍金
+                </div>
+            </div>
+
+            <form method="POST">
+                <div class="form-group">
+                    <label for="book_data">图书数据：</label>
+                    <textarea id="book_data" name="book_data" placeholder="请输入图书数据，每行格式：书名,作者,分类" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn submit-btn">批量添加</button>
+                <a href="/books" class="btn cancel-btn">取消</a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

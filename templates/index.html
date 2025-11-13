@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>首页 - 图书管理系统</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .header { background-color: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .stats { display: flex; justify-content: space-between; margin: 20px 0; }
+        .stat-card { background-color: white; padding: 20px; border-radius: 5px; text-align: center; flex: 1; margin: 0 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 2em; font-weight: bold; margin: 10px 0; }
+        .btn { 
+            padding: 10px 15px; 
+            text-decoration: none; 
+            border: none; 
+            border-radius: 5px; 
+            margin: 0 5px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .add-btn { background-color: #2196F3; color: white; }
+        .batch-add-btn { background-color: #9C27B0; color: white; }
+        .list-btn { background-color: #4CAF50; color: white; }
+        .history-btn { background-color: #9C27B0; color: white; }
+        .suggestion-btn { background-color: #FF9800; color: white; }
+        .logout-btn { background-color: #f44336; color: white; }
+        .popular-books { margin: 30px 0; }
+        .book-rank { display: flex; align-items: center; margin: 10px 0; padding: 10px; background-color: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .rank-number { background-color: #FF9800; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; }
+        .user-info { color: white; }
+        .admin-badge { background-color: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; margin-left: 10px; }
+        .nav-links { margin-top: 20px; }
+        .feature-list { background-color: white; padding: 20px; border-radius: 5px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 图书管理系统</h1>
+        <div class="user-info">
+            欢迎，{{ user.username }} 
+            {% if user.role == 'admin' %}<span class="admin-badge">管理员</span>{% endif %}
+            <a href="{{ url_for('change_password') }}" class="btn" style="background-color: #FF9800; color: white; margin: 0 5px;">修改密码</a>
+            <a href="{{ url_for('logout') }}" class="btn logout-btn">注销</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div>总藏书量</div>
+                <div class="stat-number">{{ total_books }}</div>
+                <div>本图书</div>
+            </div>
+            <div class="stat-card">
+                <div>在馆图书</div>
+                <div class="stat-number">{{ available_books }}</div>
+                <div>可供借阅</div>
+            </div>
+            <div class="stat-card">
+                <div>借出图书</div>
+                <div class="stat-number">{{ borrowed_books }}</div>
+                <div>尚未归还</div>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <a href="/books" class="btn list-btn">📖 查看所有图书</a>
+            {% if user.role == 'admin' %}
+                <a href="/add_book" class="btn add-btn">➕ 单本添加</a>
+                <a href="/batch_add_books" class="btn batch-add-btn">📚 批量添加</a>
+            {% endif %}
+            <a href="/history" class="btn history-btn">📊 借阅历史</a>
+            <a href="/suggestions" class="btn suggestion-btn">💡 意见反馈</a>
+        </div>
+
+        {% if popular_books %}
+        <div class="popular-books">
+            <h2>🔥 热门图书排行榜</h2>
+            {% for book in popular_books %}
+            <div class="book-rank">
+                <div class="rank-number">{{ loop.index }}</div>
+                <div>
+                    <strong>《{{ book.title }}》</strong> - {{ book.author }}
+                    <br>
+                    <small>借阅次数: {{ book.borrow_count }} | 分类: {{ book.category }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="feature-list">
+            <h2>系统功能</h2>
+            <ul>
+                <li>✅ 查看图书列表</li>
+                <li>✅ 借阅图书（最多3本）</li>
+                <li>✅ 归还图书</li>
+                <li>✅ 图书评分评论</li>
+                <li>✅ 意见反馈</li>
+                <li>✅ 借阅历史</li>
+                {% if user.role == 'admin' %}
+                <li>✅ <strong>管理员功能：单本添加图书</strong></li>
+                <li>✅ <strong>管理员功能：批量添加图书</strong></li>
+                <li>✅ <strong>管理员功能：删除图书</strong></li>
+                <li>✅ <strong>管理员功能：查看所有借阅记录</strong></li>
+                <li>✅ <strong>管理员功能：管理用户意见</strong></li>
+                <li>✅ <strong>管理员功能：删除评论</strong></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

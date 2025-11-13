@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>图书列表 - 图书管理系统</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .header { background-color: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .book-item { margin: 10px 0; padding: 15px; border: 1px solid #ddd; background-color: white; border-radius: 5px; }
+        .available { color: green; }
+        .borrowed { color: red; }
+        .btn { 
+            padding: 5px 10px; 
+            text-decoration: none; 
+            border: none; 
+            border-radius: 3px; 
+            margin: 0 5px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .borrow-btn { background-color: #4CAF50; color: white; }
+        .return-btn { background-color: #f44336; color: white; }
+        .delete-btn { background-color: #ff9800; color: white; }
+        .detail-btn { background-color: #2196F3; color: white; }
+        .add-btn { background-color: #2196F3; color: white; padding: 8px 15px; }
+        .batch-add-btn { background-color: #9C27B0; color: white; padding: 8px 15px; }
+        .history-btn { background-color: #9C27B0; color: white; padding: 8px 15px; }
+        .suggestion-btn { background-color: #FF9800; color: white; padding: 8px 15px; }
+        .logout-btn { background-color: #f44336; color: white; padding: 8px 15px; }
+        .search-box { margin: 20px 0; padding: 15px; background-color: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .search-form { display: flex; margin-bottom: 10px; }
+        .search-input { flex-grow: 1; padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 3px; }
+        .search-btn { padding: 8px 15px; background-color: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .filter-form { display: flex; align-items: center; }
+        .filter-select { padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 3px; }
+        .result-count { color: #666; margin: 10px 0; }
+        .category-tag { 
+            background-color: #E1F5FE; 
+            color: #01579B; 
+            padding: 2px 8px; 
+            border-radius: 10px; 
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        .borrow-count { 
+            color: #777; 
+            font-size: 0.9em; 
+            margin-left: 10px;
+        }
+        .rating { 
+            color: #FF9800; 
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .comment-count { 
+            color: #777; 
+            font-size: 0.9em; 
+            margin-left: 5px;
+        }
+        .nav-links { margin-bottom: 20px; }
+        .user-info { color: white; }
+        .admin-badge { background-color: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; margin-left: 10px; }
+        .borrow-limit { 
+            background-color: #fff3cd; 
+            color: #856404; 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin-bottom: 15px;
+        }
+        .flash-messages { margin-bottom: 20px; }
+        .flash-success { background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+        .flash-error { background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 图书管理系统</h1>
+        <div class="user-info">
+            欢迎，{{ user.username }} 
+            {% if user.role == 'admin' %}<span class="admin-badge">管理员</span>{% endif %}
+            <a href="{{ url_for('change_password') }}" class="btn" style="background-color: #FF9800; color: white; margin: 0 5px;">修改密码</a>
+            <a href="{{ url_for('logout') }}" class="btn logout-btn">注销</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="nav-links">
+            <a href="/" class="btn">🏠 首页</a>
+            {% if user.role == 'admin' %}
+                <a href="/add_book" class="btn add-btn">➕ 单本添加</a>
+                <a href="/batch_add_books" class="btn batch-add-btn">📚 批量添加</a>
+            {% endif %}
+            <a href="/history" class="btn history-btn">📊 借阅历史</a>
+            <a href="/suggestions" class="btn suggestion-btn">💡 意见反馈</a>
+            <span style="margin-left: 20px; color: #666;">
+                当前借阅: {{ current_borrowed_count }}/3 本
+            </span>
+        </div>
+
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        {% if current_borrowed_count >= 3 %}
+        <div class="borrow-limit">
+            <strong>注意：</strong> 您已借阅 {{ current_borrowed_count }} 本书，达到最大借阅限制。请归还部分书籍后再借阅新书。
+        </div>
+        {% endif %}
+
+        <div class="search-box">
+            <form action="/books" method="GET" class="search-form">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="输入书名或作者搜索..." class="search-input">
+                <button type="submit" class="search-btn">搜索</button>
+            </form>
+            
+            <form action="/books" method="GET" class="filter-form">
+                <select name="category" class="filter-select" onchange="this.form.submit()">
+                    <option value="">所有分类</option>
+                    {% for category in categories %}
+                    <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
+                        {{ category }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <input type="hidden" name="search" value="{{ search_query }}">
+            </form>
+            
+            {% if search_query or selected_category %}
+                <p class="result-count">
+                    搜索 
+                    {% if search_query %}"{{ search_query }}"{% endif %}
+                    {% if selected_category %}{% if search_query %}且{% endif %}分类: "{{ selected_category }}"{% endif %}
+                    的结果：
+                </p>
+                <p><a href="/books">显示所有图书</a></p>
+            {% endif %}
+        </div>
+        
+        <h2>藏书列表</h2>
+        
+        {% if books_with_ratings %}
+            <p class="result-count">共找到 {{ books_with_ratings|length }} 本图书</p>
+            {% for item in books_with_ratings %}
+            <div class="book-item">
+                <strong>《{{ item.book.title }}》</strong> - {{ item.book.author }}
+                <span class="category-tag">{{ item.book.category }}</span>
+                <span class="{% if item.book.status == '在馆' %}available{% else %}borrowed{% endif %}">
+                    【{{ item.book.status }}】
+                </span>
+                <span class="borrow-count">借阅: {{ item.book.borrow_count }}次</span>
+                {% if item.avg_rating > 0 %}
+                    <span class="rating">★ {{ item.avg_rating }}</span>
+                    <span class="comment-count">({{ item.comment_count }}条评论)</span>
+                {% endif %}
+                
+                <div style="margin-top: 10px;">
+                    {% if item.book.status == '在馆' %}
+                        <a href="/borrow/{{ item.book.id }}" class="btn borrow-btn">借阅</a>
+                    {% else %}
+                        <a href="/return/{{ item.book.id }}" class="btn return-btn">归还</a>
+                    {% endif %}
+                    <a href="/book/{{ item.book.id }}" class="btn detail-btn">详情/评论</a>
+                    {% if user.role == 'admin' %}
+                        <a href="/delete/{{ item.book.id }}" class="btn delete-btn" onclick="return confirm('确定要删除《{{ item.book.title }}》吗？')">删除</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>📖 没有找到相关图书，{% if user.role == 'admin' %}<a href="/add_book">去添加一本吧！</a>{% endif %}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
